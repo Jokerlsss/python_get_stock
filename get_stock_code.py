@@ -1,13 +1,14 @@
+# Description: 获取股票编码
+
 import requests
 import random
 from bs4 import BeautifulSoup as bs
 import time
 import redis
 
-# 2020-1-31：未解决问题：连接不上redis
 def get_stock_names():
     # rds=redis.Redis(host="175.24.66.216", port=6379, password="123456")
-    # rds = redis.from_url('redis://:123456@175.24.66.216:6379/0',db=1,decode_responses=True)
+    rds = redis.from_url('redis://:123456@175.24.66.216:6379',db=1,decode_responses=True)
     url = "http://quote.eastmoney.com/stock_list.html#"
     headers = {
         'Referer':'http://quote.eastmoney.com',
@@ -22,7 +23,8 @@ def get_stock_names():
         for ul in all_ul:
             all_a=ul.find_all('a')
             for a in all_a:
-                # rds.rpush('stock_names',a.text)
+                rds.rpush('stock_names',a.text)
                 f.write(a.text+'\n')
+    print('Finish to Get')
 
 get_stock_names()
