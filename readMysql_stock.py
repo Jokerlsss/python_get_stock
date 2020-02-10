@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy import Column,Integer,String
-
 from sqlalchemy.orm import sessionmaker
+import connect_mysql
 
 # --------------------------------- 连接 mysql  ---------------------------------
 

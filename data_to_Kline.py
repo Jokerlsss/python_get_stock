@@ -16,6 +16,7 @@ app=Flask(__name__)
 def get_graph():
     # 连接 mysql
     engine = create_engine('mysql+mysqlconnector://root:123456@localhost:3306/stock_data')
+    con = engine.connect()
 
     BaseModel=declarative_base()
 
@@ -24,12 +25,12 @@ def get_graph():
     tables=BaseModel.metadata.tables
     # 获取所有 table 名称
     tables_names=list(tables.keys())
-    con=engine.connect()
+
     # 随机选取一只股票
     stock_name=random.choice(tables_names)
     # 获取股票数据
     print(stock_name)
-    df=pd.read_sql('select * from `{}`'.format(stock_name),con=con)
+    df=pd.read_sql('select * from `{}` order by 日期 asc'.format(stock_name),con=con)
 
     # to_json 将数据类型以 values 形式转换为 json 格式
     jsonDF=df.to_json(orient="values",force_ascii=False,date_format="日期")
@@ -39,6 +40,7 @@ def get_graph():
 
     # para用于最终的数据格式呈现，如：[["xxx","yy"],["xx","yy"]]
     para = []
+    para.append(stock_name)
     for i in jsonToList:
         # 时间戳多出3个0，为 int 类型，故处理成 除以1000
         timeArray=time.localtime(i[0]/1000)
@@ -51,8 +53,11 @@ def get_graph():
         b=[str(j) for j in i]
         para.append(b)
     # list 不能作为返回值，得先转成 json格式
+    print("para:", para[1])
     return json.dumps(para,ensure_ascii=False)
-    print("para:",para)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5590)
 
 
     # ------------------------ 将 K 线图画在 html 文件中----------------------
@@ -69,5 +74,3 @@ def get_graph():
     # fig=dict(data=data,layout=layout)
     # po.plot(fig,filename='stock.html')
 
-if __name__=='__main__':
-    app.run(host='0.0.0.0',port=5590)
